@@ -149,10 +149,8 @@ def Check_Win(state):
         if state[0][columns] == state[1][columns] and state[0][columns] == state[2][columns] and state[0][columns] != "":
             return True
     
-    
     if state[0][0] == state[1][1] and state[0][0] == state[2][2] and state[0][0] != "":
         return True
-    
     
     if state[0][2] == state[1][1] and state[0][2] == state[2][0] and state[0][2] != "":
         return True
