@@ -6,7 +6,7 @@ import csv
 Q_TABLE = {} #{"State":{"Move":Reward}}
 
 LEARNING_RATE = 0.05
-DISCOUNT = 0.5
+DISCOUNT = 0.8
 
 
 class TicTacToeTrain:
@@ -19,6 +19,7 @@ class TicTacToeTrain:
     
     def Game(self):
         while True:
+            opponent_turns = 0
             while self.turn:
                 self.row, self.column = AI(self.state).Train_Move()
                 self.moves = [self.row, self.column]
@@ -26,16 +27,17 @@ class TicTacToeTrain:
                 self.state[self.row][self.column] = "X"
                 self.done = Check_Win(self.state)
                 if self.done == True:
-                    AI(self.x_state).Reward_Win_Lose_Draw("win", self.moves)
+                    AI(self.x_state).Reward_Win_Lose_Draw("win", self.moves, opponent_turns)
                     return
                 else:
                     self.done = Check_Draw(self.state)
                     if self.done == True:
-                        AI(self.x_state).Reward_Win_Lose_Draw("draw", self.moves)
+                        AI(self.x_state).Reward_Win_Lose_Draw("draw", self.moves, opponent_turns)
                         return
                 self.turn = False
                         
             while not(self.turn) and not(self.done):
+                opponent_turns += 1
                 moves = Check_Moves(self.state)
                 move = rand.choice(moves)
                 row = move[0]
@@ -43,15 +45,15 @@ class TicTacToeTrain:
                 self.state[row][column] = "O"
                 self.done = Check_Win(self.state)
                 if self.done == True:
-                    AI(self.x_state).Reward_Win_Lose_Draw("lose", self.moves)
+                    AI(self.x_state).Reward_Win_Lose_Draw("lose", self.moves, opponent_turns)
                     return
                 else:
                     self.done = Check_Draw(self.state)
                     if self.done == True:
-                        AI(self.x_state).Reward_Win_Lose_Draw("draw", self.moves)
+                        AI(self.x_state).Reward_Win_Lose_Draw("draw", self.moves, opponent_turns)
                         return
                     else:
-                        AI(self.x_state).Reward(self.state, self.moves)
+                        AI(self.x_state).Reward(self.state, self.moves, opponent_turns)
                 self.turn = True
         
 class AI:
@@ -87,23 +89,23 @@ class AI:
                 max_score_move = [int(x[1]), int(x[4])]
         return max_score_move[0], max_score_move[1]
                 
-    def Reward(self, next_state, move):
+    def Reward(self, next_state, move, move_num):
         self.move = move
         self.next_state = [x[:] for x in next_state]
         values = []
         for value in Q_TABLE[str(self.next_state)].values():
             values.append(float(value))
-        reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * max(values) - float(Q_TABLE[str(self.state)][str(self.move)]))
+        reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * max(values) - move_num - float(Q_TABLE[str(self.state)][str(self.move)]))
         Q_TABLE[str(self.state)].update({str(self.move):reward})
     
-    def Reward_Win_Lose_Draw(self, outcome, move):
+    def Reward_Win_Lose_Draw(self, outcome, move, move_num):
         self.move = move
         if outcome == "win":
-            reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * 100 - float(Q_TABLE[str(self.state)][str(self.move)]))
+            reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * 100 - move_num - float(Q_TABLE[str(self.state)][str(self.move)]))
         elif outcome == "lose":
-            reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * -100 - float(Q_TABLE[str(self.state)][str(self.move)]))
+            reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * -100 - move_num - float(Q_TABLE[str(self.state)][str(self.move)]))
         else:
-            reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * -20 - float(Q_TABLE[str(self.state)][str(self.move)]))
+            reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * -20 - move_num - float(Q_TABLE[str(self.state)][str(self.move)]))
         Q_TABLE[str(self.state)].update({str(self.move):reward})
 
 
