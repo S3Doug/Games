@@ -106,6 +106,7 @@ class AI:
             reward = float(Q_TABLE[str(self.state)][str(self.move)]) + LEARNING_RATE*(DISCOUNT * -20 - float(Q_TABLE[str(self.state)][str(self.move)]))
         Q_TABLE[str(self.state)].update({str(self.move):reward})
 
+
 def Train():
     with open("TicTacToeQTable.csv", newline="") as file:
         f = csv.reader(file)
